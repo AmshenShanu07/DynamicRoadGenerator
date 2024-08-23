@@ -1,0 +1,19 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+    /* overflow: hidden; */
+    height: 700vh;
+    scroll-behavior: smooth;
+}
+
+
+#webgl {
+  height: 500vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  outline: none;
+}
