@@ -74,7 +74,7 @@ const generateRoad = () => {
 
   const curve = new THREE.CatmullRomCurve3(curvePoints);
   
-  const pointsCount = 100;
+  const pointsCount = 20 * debug.curvePointCount;
   const width = 2;
   const halfWidth = width / 2;
 
@@ -127,7 +127,7 @@ generateRoad()
 
 
 // Debug ui, managing the count of curve points
-gui.add(debug,'curvePointCount').name('Curve Point Count').min(5).max(30).step(1).onFinishChange(() => {
+gui.add(debug,'curvePointCount').name('Curve Point Count').min(5).max(30).step(1).onFinishChange((val) => {
   generateRoad()
 })
 
