@@ -31,107 +31,97 @@ const debug = {
   curvePointCount: 20
 }
 
+// Road Texture
+const roadTexture = textureLoader.load('./texture/road.jpg');
+roadTexture.wrapS = THREE.RepeatWrapping;
+roadTexture.wrapT = THREE.RepeatWrapping;
+roadTexture.colorSpace = THREE.SRGBColorSpace;
+roadTexture.flipY = false;
+roadTexture.repeat.set(200,5)
+
+const roadMat = new THREE.MeshStandardMaterial({ 
+  side: THREE.DoubleSide,
+  map: roadTexture,
+});
 
 // function to generate the road
 let road
+
+
 const generateRoad = () => {
 
   const { curvePointCount } = debug;
 
-  //Removing previous road mesh, if its rendered before
+  // Removing previous road mesh, if it's rendered before
   if(road) {
-    road.geometry.dispose()
-    road.material.dispose()
-    scene.remove(road)
+    road.geometry.dispose();
+    road.material.dispose();
+    scene.remove(road);
   }
 
-  const curvePoints = []
-  
-  //Generating random positions
-  for( var i = 0; i<curvePointCount; i++ ) {
+  const curvePoints = [];
+
+  // Generating random positions
+  for(let i = 0; i < curvePointCount; i++) {
     curvePoints.push(
       new THREE.Vector3(
-        randInt(-6,6),
+        i==0?0:randInt(-6, 6),
         0,
-        -(i*5) + 5
+        -(i * 5) + 5
       )
-    )
+    );
   }
-  
+
   const curve = new THREE.CatmullRomCurve3(curvePoints);
+  
+  const pointsCount = 100;
+  const width = 2;
+  const halfWidth = width / 2;
 
-  
-  
-  var pointsCount = 100;
-  var pointsCount1 = pointsCount + 1;
-  var width = 2;
-  var widthSteps = 1;
-  
-  var pts = curve.getPoints(pointsCount);
-  let pts2 = curve.getPoints(pointsCount);
-  
-  pts.forEach(p => {
-    p.x -= width; // offsetting to make road center
-  });
-  
-  pts2.forEach(p => {
-    p.x += width; // creating width of the road
-  });
-  
-  pts = pts.concat(pts2);
-  
-  var roadGeo = new THREE.BufferGeometry().setFromPoints(pts);
-  
-  
-  
-  var indices = [];
-  const uv = []
+  const pts = [];
+  const uvs = [];
+  const indices = [];
 
-  //Creating Faces and UV for geometry
-  for (var iy = 0; iy < widthSteps; iy++)
-    for (var ix = 0; ix < pointsCount; ix++) {
-  
-      var a = ix + pointsCount1 * iy;
-      var b = ix + pointsCount1 * (iy + 1);
-      var c = (ix + 1) + pointsCount1 * (iy + 1);
-      var d = (ix + 1) + pointsCount1 * iy;
-  
-      indices.push(a, b, d);
-      indices.push(b, c, d);
-  
-      uv.push(1.0,0.0);
-      uv.push(0.0,0.0);
-      uv.push(0.0,1.0);
-      uv.push(1.0,1.0);
-  
+  // Generate the geometry with proper width
+  for(let i = 0; i < pointsCount; i++) {
+    const t = i / (pointsCount - 1);
+    const point = curve.getPoint(t);
+    const tangent = curve.getTangent(t).normalize();
+    
+    // Calculate the normal to the curve at this point
+    const normal = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+    
+    // Offset the points to create the road's width
+    const leftPoint = point.clone().add(normal.clone().multiplyScalar(halfWidth));
+    const rightPoint = point.clone().add(normal.clone().multiplyScalar(-halfWidth));
+    
+    pts.push(leftPoint, rightPoint);
+    
+    // UV coordinates
+    uvs.push(i / (pointsCount - 1), 0);
+    uvs.push(i / (pointsCount - 1), 1);
+    
+    if(i < pointsCount - 1) {
+      const a = i * 2;
+      const b = i * 2 + 1;
+      const c = i * 2 + 2;
+      const d = i * 2 + 3;
+      
+      indices.push(a, b, c);
+      indices.push(b, d, c);
     }
-  
-  
-  
-  roadGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv,2))
+  }
+
+  const roadGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  roadGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
   roadGeo.setIndex(indices);
   roadGeo.computeVertexNormals();
-  
-  
-  // Road Texture
-  const roadTexture = textureLoader.load('./texture/road.jpg');
-  roadTexture.wrapS = THREE.RepeatWrapping;
-  roadTexture.wrapT = THREE.RepeatWrapping;
-  roadTexture.colorSpace = THREE.SRGBColorSpace
 
 
-
-  
-  const roadMat = new THREE.MeshStandardMaterial({ 
-    side: THREE.DoubleSide,
-    map: roadTexture,
-  });
-  
   road = new THREE.Mesh(roadGeo, roadMat);
-
-  
   scene.add(road);
 }
+
 
 generateRoad()
 
