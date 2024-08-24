@@ -23,8 +23,23 @@ const size = {
 }
 
 // Lights
-const ambientLight = new THREE.AmbientLight('#fff',3);
+const ambientLight = new THREE.AmbientLight('#fff',8);
 scene.add(ambientLight);
+
+const envTexture = textureLoader.load('./env.png');
+envTexture.flipY = true;
+envTexture.colorSpace = THREE.SRGBColorSpace;
+
+const envGeo = new THREE.SphereGeometry(500,500, 60,60);
+envGeo.scale(-1,1,1);
+
+const envMaterial = new THREE.MeshStandardMaterial({ map: envTexture })
+
+const envMesh = new THREE.Mesh(envGeo,envMaterial);
+
+scene.add(envMesh);
+
+
 
 
 const debug = {
@@ -59,15 +74,24 @@ const generateRoad = () => {
     scene.remove(road);
   }
 
-  const curvePoints = [];
+  const curvePoints = []
+
+  // const curvePoints = [
+  //   new THREE.Vector3(100,0,-10),
+  //   new THREE.Vector3(10,0,-10),
+  //   new THREE.Vector3(2,0,-10),
+  //   new THREE.Vector3(0,0,0),
+  //   new THREE.Vector3(0,0,10)
+  // ]
+
 
   // Generating random positions
   for(let i = 0; i < curvePointCount; i++) {
     curvePoints.push(
       new THREE.Vector3(
-        i==0?0:randInt(-6, 6),
+        (i==0 || i==1)?0:randInt(-15, 15),
         0,
-        -(i * 5) + 5
+        -(i * 10) + 10
       )
     );
   }
@@ -75,7 +99,7 @@ const generateRoad = () => {
   const curve = new THREE.CatmullRomCurve3(curvePoints);
   
   const pointsCount = 20 * debug.curvePointCount;
-  const width = 2;
+  const width = 5;
   const halfWidth = width / 2;
 
   const pts = [];
