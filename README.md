@@ -3,7 +3,7 @@ This will generate dynamic road using a curve path, each time we refresh curve p
 
 
 ## Issues 
-- Texture is stretching
+- ~~Texture is stretching~~
 - ~~Not able to maintain uniform width for tht road~~
 
 
